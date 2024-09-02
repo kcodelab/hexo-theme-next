@@ -1,0 +1,35 @@
+name: Auto Pull Repository Updates
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+
+  auto-pull:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout Repo
+      uses: actions/checkout@v2
+      
+    - name: Pull Latest Changes
+      run: |
+        git pull
+      env:
+        # 使用 GitHub Actions 提供的 GITHUB_TOKEN 环境变量进行身份验证
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        
+    - name: Commit Changes
+      run: |
+        git config --local user.email "action@github.com"
+        git config --local user.name "GitHub Action"
+        git add .
+        git commit -m "Auto pull repository updates" || echo "No changes to commit"
+        
+    - name: Push Changes
+      uses: ad-m/github-push-action@master
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        branch: ${{ github.ref }}
